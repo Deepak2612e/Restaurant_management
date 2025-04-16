@@ -1,0 +1,31 @@
+debug: true
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+      #      default-filters:
+      #        - RewritePath=([^/])$, $1/ #Rewrite /
+      mvc:
+        routes:
+          - id: order-service-routes
+            uri: lb://ORDER-SERVICE
+            predicates:
+              - Path=/api/orders/**
+              - Method=GET,POST,OPTIONS
+            filters:
+              - RewritePath=/api/orders/(?<segment>.*), /orders/$\{segment}
+          - id: restaurant-service-route
+            uri: lb://RESTAURANT-SERVICE
+            predicates:
+              - Path=/api/food/**
+              - Method=GET,POST,OPTIONS
+            filters:
+              - RewritePath=/api/food/(?<segment>.*), /food/$\{segment}
+
+server:
+  port: 8080
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${DISCOVERY_SERVER:localhost}:8761/eureka
